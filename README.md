@@ -1,3 +1,8 @@
+# fork-reason
+
+The goal is to extend the library to support EMV card reading.
+First release is to add EMV Contactless Communication Protocol functions.
+
 # mfrc522
 
 A python library to read/write RFID tags via the budget MFRC522 RFID module.
