@@ -4,6 +4,8 @@ The goal is to extend the library to support EMV card reading.
 
 First release is to add EMV Contactless Communication Protocol functions.
 
+Branch micropython is to run a library on MicroPython v1.17 (RP2) without additional libraries.
+
 # mfrc522
 
 A python library to read/write RFID tags via the budget MFRC522 RFID module.
