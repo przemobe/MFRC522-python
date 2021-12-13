@@ -144,13 +144,14 @@ class EmvComMFRC522(MFRC522):
                 blockDisc = (backData[0] >> 6) & 0x03
                 blockName = self.EMVCOM_PCB_BLOK_NAMES[blockDisc]
                 if self.EmvComRxDebug: print('Rx{}: '.format(blockName), ":".join("{:02x}".format(ord(chr(c))) for c in backData))
-                if self.EMVCOM_PCB_BLOK_TYPE_SBLOCK == blockDisc:
+                if self.EMVCOM_PCB_BLOK_TYPE_RBLOCK == blockDisc:
                     if 0x10 & backData[0]:
-                        if self.EmvComRxDebug: print('RxRBlock(NAK)')
-                        continue
-                    pass
+                        print('RxRBlock(NAK)')
+                        return (self.MI_ERR, [])
                 else:
+                    # TODO: add handler for WTX
                     print('Rx unsupported block type: ', ":".join("{:02x}".format(ord(chr(c))) for c in backData))
+                    return (self.MI_ERR, [])
 
             startBlkIdx += maxTxBlkLen
             endBlkIdx += maxTxBlkLen
