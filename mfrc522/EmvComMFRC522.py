@@ -165,7 +165,13 @@ class EmvComMFRC522(MFRC522):
                 rxData.extend(backData[1:-2]) # skip 1B header and cut 2B CRC
                 chaining = (0 != 0x10 & backData[0])
                 rxBlockNum = 0x01 & backData[0]
-                break
+                retx = 0
+                if chaining:
+                    (status, backData) = self.EmvCom_TxRBlock()
+                    if (self.MI_ERR == status):
+                        return (status, [])
+                else:
+                    break
             elif self.EMVCOM_PCB_BLOK_TYPE_SBLOCK == blockDisc:
                 sblockType = (0x30 & backData[0]) >> 4
                 print('RxSBlock type({}) [0=DESELECT, 3=WTX] : '.format(sblockType), ":".join("{:02x}".format(ord(chr(c))) for c in backData))
@@ -180,23 +186,9 @@ class EmvComMFRC522(MFRC522):
                         return (self.MI_ERR, [])
                 else:
                     # TODO
+                    print('Rx unsupported SBlock type({}): '.format(sblockType), ":".join("{:02x}".format(ord(chr(c))) for c in backData))
                     return (self.MI_ERR, [])
             else:
-                print('Rx unsupported block type: ', ":".join("{:02x}".format(ord(chr(c))) for c in backData))
-                return (self.MI_ERR, [])
-
-        while chaining:
-            (status, backData) = self.EmvCom_TxRBlock()
-            if (self.MI_ERR == status):
-                return (status, [])
-
-            rxData.extend(backData[1:-2]) # skip 1B header and cut 2B CRC
-            chaining = (0 != 0x10 & backData[0])
-            rxBlockNum = 0x01 & backData[0]
-            blockDisc = (backData[0] >> 6) & 0x03
-            blockName = self.EMVCOM_PCB_BLOK_NAMES[blockDisc]
-            if self.EmvComRxDebug: print('Rx{}: '.format(blockName), ":".join("{:02x}".format(ord(chr(c))) for c in backData))
-            if self.EMVCOM_PCB_BLOK_TYPE_IBLOCK != blockDisc:
                 print('Rx unsupported block type: ', ":".join("{:02x}".format(ord(chr(c))) for c in backData))
                 return (self.MI_ERR, [])
 
