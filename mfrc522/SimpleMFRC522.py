@@ -26,7 +26,7 @@ class SimpleMFRC522:
     return id
 
   def read_id_no_block(self):
-      (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+      (status, atqa) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
       if status != self.READER.MI_OK:
           return None
       (status, uid) = self.READER.MFRC522_Anticoll()
@@ -35,7 +35,7 @@ class SimpleMFRC522:
       return self.uid_to_num(uid)
   
   def read_no_block(self):
-    (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+    (status, atqa) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
     if status != self.READER.MI_OK:
         return None, None
     (status, uid) = self.READER.MFRC522_Anticoll()
@@ -63,7 +63,7 @@ class SimpleMFRC522:
       return id, text_in
 
   def write_no_block(self, text):
-      (status, TagType) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
+      (status, atqa) = self.READER.MFRC522_Request(self.READER.PICC_REQIDL)
       if status != self.READER.MI_OK:
           return None, None
       (status, uid) = self.READER.MFRC522_Anticoll()

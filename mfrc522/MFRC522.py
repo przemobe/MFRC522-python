@@ -261,7 +261,7 @@ class MFRC522:
         if ((status != self.MI_OK) | (backBits != 0x10)):
             status = self.MI_ERR
 
-        return (status, backBits)
+        return (status, backData)
 
     def MFRC522_Anticoll(self):
         backData = []

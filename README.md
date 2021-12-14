@@ -41,7 +41,7 @@ def apduCmdSelectByName(name):
 
 def readEmv():
     while True:
-        (status, backBits) = READER.MFRC522_Request(READER.PICC_REQIDL)
+        (status, atqa) = READER.MFRC522_Request(READER.PICC_REQIDL)
         if READER.MI_OK != status:
             continue
         (status, uid) = READER.MFRC522_Anticoll()
