@@ -38,7 +38,13 @@ class MFRC522:
     PICC_REQIDL = 0x26
     PICC_REQALL = 0x52
     PICC_ANTICOLL = 0x93
+    PICC_ANTICOLL_CL1 = 0x93
+    PICC_ANTICOLL_CL2 = 0x95
+    PICC_ANTICOLL_CL3 = 0x97
     PICC_SElECTTAG = 0x93
+    PICC_SELECTTAG_CL1 = 0x93
+    PICC_SELECTTAG_CL2 = 0x95
+    PICC_SELECTTAG_CL3 = 0x97
     PICC_AUTHENT1A = 0x60
     PICC_AUTHENT1B = 0x61
     PICC_READ = 0x30
@@ -254,9 +260,9 @@ class MFRC522:
         if ((status != self.MI_OK) | (backBits != 0x10)):
             status = self.MI_ERR
 
-        return (status, backBits)
+        return (status, backData)
 
-    def MFRC522_Anticoll(self):
+    def MFRC522_Anticoll(self, sel=PICC_ANTICOLL_CL1):
         backData = []
         serNumCheck = 0
 
@@ -264,7 +270,7 @@ class MFRC522:
 
         self.Write_MFRC522(self.BitFramingReg, 0x00)
 
-        serNum.append(self.PICC_ANTICOLL)
+        serNum.append(sel)
         serNum.append(0x20)
 
         (status, backData, backBits) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, serNum)
@@ -300,10 +306,10 @@ class MFRC522:
         pOutData.append(self.Read_MFRC522(self.CRCResultRegM))
         return pOutData
 
-    def MFRC522_SelectTag(self, serNum):
+    def MFRC522_SelectTag(self, serNum, sel=PICC_SELECTTAG_CL1):
         backData = []
         buf = []
-        buf.append(self.PICC_SElECTTAG)
+        buf.append(sel)
         buf.append(0x70)
 
         for i in range(5):
@@ -319,6 +325,41 @@ class MFRC522:
             return backData[0]
         else:
             return 0
+
+    def MFRC522_TypeACollisionDetection(self):
+        cl_uid_sak = []
+
+        (status, atqa) = self.MFRC522_Request(self.PICC_REQIDL)
+        if self.MI_OK != status:
+            return None
+
+        uidSize = (atqa[0] >> 6) & 0x3
+
+        (status, uid) = self.MFRC522_Anticoll(self.PICC_ANTICOLL_CL1)
+        if self.MI_OK != status:
+            return None
+        sak = self.MFRC522_SelectTag(uid, self.PICC_SELECTTAG_CL1)
+        cl_uid_sak.append((uid, sak))
+        if 0 == uidSize:
+            return cl_uid_sak
+
+        (status, uid) = self.MFRC522_Anticoll(self.PICC_ANTICOLL_CL2)
+        if self.MI_OK != status:
+            return None
+        sak = self.MFRC522_SelectTag(uid, self.PICC_SELECTTAG_CL2)
+        cl_uid_sak.append((uid, sak))
+        if 1 == uidSize:
+            return cl_uid_sak
+
+        (status, uid) = self.MFRC522_Anticoll(self.PICC_ANTICOLL_CL3)
+        if self.MI_OK != status:
+            return None
+        sak = self.MFRC522_SelectTag(uid, self.PICC_SELECTTAG_CL3)
+        cl_uid_sak.append((uid, sak))
+        if 2 == uidSize:
+            return cl_uid_sak
+
+        return None
 
     def MFRC522_Auth(self, authMode, BlockAddr, Sectorkey, serNum):
         buff = []
@@ -416,3 +457,13 @@ class MFRC522:
         self.Write_MFRC522(self.TxAutoReg, 0x40)
         self.Write_MFRC522(self.ModeReg, 0x3D)
         self.AntennaOn()
+
+    @staticmethod
+    def MFRC522_GetUID(cl_uid_sak):
+        if 1 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][0:4]
+        elif 2 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][1:4] + cl_uid_sak[1][0][0:4]
+        elif 3 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][1:4] + cl_uid_sak[1][0][1:4] + cl_uid_sak[2][0][0:4]
+        return []

@@ -2,7 +2,9 @@
 
 The goal is to extend the library to support EMV card reading.
 
-First release is to add EMV Contactless Communication Protocol functions.
+1) Add EMV Contactless Communication Protocol functions
+2) Add support for double and triple size UID
+3) Port to MicroPython v1.17 (RP2) (see micropython branch)
 
 Branch micropython is to run a library on MicroPython v1.17 (RP2) without additional libraries.
 
@@ -33,29 +35,25 @@ from mfrc522 import EmvComMFRC522
 
 READER = EmvComMFRC522()
 
-def apduCmdSelectByName(name):
+def getApduCmdSelectByName(name):
     buf = [0x00, 0xA4, 0x04, 0x00]
     buf.append(len(name))
     buf.extend(ord(c) for c in name)
     buf.append(0x00)
-    return READER.EmvCom_TransciveApdu(buf)
+    return buf
 
 
 def readEmv():
     while True:
-        (status, backBits) = READER.MFRC522_Request(READER.PICC_REQIDL)
-        if READER.MI_OK != status:
+        cl_uid_sak = READER.MFRC522_TypeACollisionDetection()
+        if None == cl_uid_sak:
             continue
-        (status, uid) = READER.MFRC522_Anticoll()
-        if READER.MI_OK != status:
-            continue
-        print('UID: ', ':'.join('{:02X}'.format(x) for x in uid))
         break
 
-    sakByte0 = READER.MFRC522_SelectTag(uid)
-    print('SAK[0]: 0x{:02X}'.format(sakByte0))
+    print('SAK: ', ' '.join('{:02X}'.format(x[1]) for x in cl_uid_sak))
+    print('UID: ', ' '.join('{:02X}'.format(x) for x in READER.MFRC522_GetUID(cl_uid_sak)))
 
-    if 0 == 0x20 & sakByte0:
+    if 0 == 0x20 & cl_uid_sak[0][1]:
         print('Not ISO 14443-4 Compilant!')
         return
 
@@ -65,7 +63,8 @@ def readEmv():
         return
     print('ATS: ', ':'.join('{:02X}'.format(x) for x in backData))
 
-    (status, backData) = apduCmdSelectByName('2PAY.SYS.DDF01')
+    cmd = getApduCmdSelectByName('2PAY.SYS.DDF01')
+    (status, backData) = READER.EmvCom_TransciveApdu(cmd)
     if READER.MI_ERR == status:
         print('Read Select PSE Response ERROR!')
         return
