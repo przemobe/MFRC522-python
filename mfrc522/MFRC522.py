@@ -464,3 +464,13 @@ class MFRC522:
         self.Write_MFRC522(self.TxAutoReg, 0x40)
         self.Write_MFRC522(self.ModeReg, 0x3D)
         self.AntennaOn()
+
+    @staticmethod
+    def MFRC522_GetUID(cl_uid_sak):
+        if 1 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][0:4]
+        elif 2 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][1:4] + cl_uid_sak[1][0][0:4]
+        elif 3 == len(cl_uid_sak):
+            return cl_uid_sak[0][0][1:4] + cl_uid_sak[1][0][1:4] + cl_uid_sak[2][0][0:4]
+        return []
