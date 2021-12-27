@@ -41,11 +41,9 @@ def getApduCmdReadRecord(sfi, recordNum):
 
 
 def readEmv():
-    while True:
+    cl_uid_sak = None
+    while None == cl_uid_sak:
         cl_uid_sak = READER.MFRC522_TypeACollisionDetection()
-        if None == cl_uid_sak:
-            continue
-        break
 
     print('SAK: ', ' '.join('{:02X}'.format(x[1]) for x in cl_uid_sak))
     print('UID: ', ' '.join('{:02X}'.format(x) for x in READER.MFRC522_GetUID(cl_uid_sak)))
