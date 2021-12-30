@@ -16,7 +16,11 @@ This code was published in relation to a [blog post](https://pimylifeup.com/rasp
 
 ## Installation
 
-Until the package is on PyPi, clone this repository and run `python setup.py install` in the top level directory.
+Copy entire mfrc522 directory to your board.
+
+## Wiring
+
+Wiring requires pins for SPI: SCK, MISO, MOSI and ChipSelect.
 
 # mfrc522/EmvComMFRC522
 
