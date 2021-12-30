@@ -3,6 +3,8 @@
 
 #    Copyright 2021 Przemyslaw Bereski https://github.com/przemobe/
 
+#    This is version for MicroPython v1.17
+
 from . import MFRC522
 
 class EmvComMFRC522(MFRC522):
@@ -24,8 +26,8 @@ class EmvComMFRC522(MFRC522):
 
     EMVCOM_FSDI2BYTES = [16, 24, 32, 40, 48, 64, 96, 128, 256]
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_mode=10, pin_rst=-1, debugLevel='WARNING'):
-        MFRC522.__init__(self, bus, device, spd, pin_mode, pin_rst, debugLevel)
+    def __init__(self, spi, cs, debugLevel='WARNING'):
+        MFRC522.__init__(self, spi, cs, debugLevel)
         self.MAX_LEN = 64 # max supported by MRFC522
 
     def EmvCom_TxRATS(self, param = 0x50):

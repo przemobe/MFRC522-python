@@ -20,6 +20,9 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with MFRC522-Python.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+#    This is version for MicroPython v1.17
+
 from machine import Pin
 from machine import SPI
 #import logging # TODO
@@ -129,21 +132,17 @@ class MFRC522:
 
     serNum = []
 
-    def __init__(self, bus=0, device=0, spd=1000000, pin_mode=10, pin_rst=-1, debugLevel='WARNING'):
-        self.spi = SPI(bus, baudrate=spd, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
+    def __init__(self, spi, cs, debugLevel='WARNING'):
+        self.spi = spi
         self.spi.init()
+
+        self.cs = cs
+        self.cs.init(Pin.OUT, value=1)
 
         #self.logger = logging.getLogger('mfrc522Logger')
         #self.logger.addHandler(logging.StreamHandler())
         #level = logging.getLevelName(debugLevel)
         #self.logger.setLevel(level)
-
-        if pin_rst == -1:
-            self.resetPin = Pin(20, Pin.OUT, value=1)
-        else:
-            self.resetPin = Pin(pin_rst, Pin.OUT, value=1)
-
-        self.csPin = Pin(17, Pin.OUT, value=1)
 
         self.MFRC522_Init()
 
@@ -151,15 +150,15 @@ class MFRC522:
         self.Write_MFRC522(self.CommandReg, self.PCD_RESETPHASE)
 
     def Write_MFRC522(self, addr, val):
-        self.csPin(0)
+        self.cs(0)
         self.spi.write(bytearray([(addr << 1) & 0x7E, val]))
-        self.csPin(1)
+        self.cs(1)
 
     def Read_MFRC522(self, addr):
         val = bytearray(2)
-        self.csPin(0)
+        self.cs(0)
         self.spi.write_readinto(bytearray([((addr << 1) & 0x7E) | 0x80, 0]), val)
-        self.csPin(1)
+        self.cs(1)
         return val[1]
 
     def Close_MFRC522(self):

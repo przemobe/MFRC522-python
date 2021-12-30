@@ -29,11 +29,14 @@ The following code will read EMV card and print Select PSE Response:
 ```python
 #!/usr/bin/python3
 
-import RPi.GPIO as GPIO
+#    This is version for MicroPython v1.17
+
+from machine import Pin, SPI
 from time import sleep
 from mfrc522 import EmvComMFRC522
 
-READER = EmvComMFRC522()
+spi0 = SPI(0, baudrate=1000000, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
+READER = EmvComMFRC522(spi0, Pin(17))
 
 def getApduCmdSelectByName(name):
     buf = [0x00, 0xA4, 0x04, 0x00]
@@ -78,7 +81,6 @@ if __name__ == '__main__':
             sleep(5)
 
     except KeyboardInterrupt:
-        GPIO.cleanup()
         raise
 ```
 

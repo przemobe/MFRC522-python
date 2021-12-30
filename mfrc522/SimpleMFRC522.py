@@ -1,6 +1,8 @@
 # Code by Simon Monk https://github.com/simonmonk/
+#    This is version for MicroPython v1.17
 
 from . import MFRC522
+from machine import Pin, SPI
   
 class SimpleMFRC522:
 
@@ -10,7 +12,8 @@ class SimpleMFRC522:
   BLOCK_ADDRS = [8, 9, 10]
   
   def __init__(self):
-    self.READER = MFRC522()
+    self.spi0 = SPI(0, baudrate=1000000, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
+    self.READER = MFRC522(spi0, Pin(17))
   
   def read(self):
       id, text = self.read_no_block()
