@@ -202,8 +202,8 @@ class MFRC522:
 
         self.Write_MFRC522(self.CommandReg, self.PCD_IDLE)
 
-        for i in range(len(sendData)):
-            self.Write_MFRC522(self.FIFODataReg, sendData[i])
+        for dataByte in sendData:
+            self.Write_MFRC522(self.FIFODataReg, dataByte)
 
         self.Write_MFRC522(self.CommandReg, command)
 
@@ -290,8 +290,8 @@ class MFRC522:
         self.ClearBitMask(self.DivIrqReg, 0x04)
         self.SetBitMask(self.FIFOLevelReg, 0x80)
 
-        for i in range(len(pIndata)):
-            self.Write_MFRC522(self.FIFODataReg, pIndata[i])
+        for dataByte in pIndata:
+            self.Write_MFRC522(self.FIFODataReg, dataByte)
 
         self.Write_MFRC522(self.CommandReg, self.PCD_CALCCRC)
         i = 0xFF
